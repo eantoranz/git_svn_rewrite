@@ -13,4 +13,5 @@ author_line=$( egrep '^'$GIT_AUTHOR_NAME' {0,}=' $SVN_AUTHORS | $( dirname ${BAS
 export GIT_AUTHOR_NAME=$( echo $author_line | cut -d " " -f2- )
 export GIT_AUTHOR_EMAIL=$( echo $author_line | sed 's/ .*//' )
 
-
+export GIT_COMMITTER_NAME=$GIT_AUTHOR_NAME
+export GIT_COMMITTER_EMAIL=$GIT_AUTHOR_EMAIL
