@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# copyright 2015 Edmundo Carmona Antoranz
+# released under the terms of GPLv2
+
 import sys
 
 def defaultValues():
