@@ -4,9 +4,10 @@
 # released under the terms of GPLv2
 
 import sys
+import os
 
 def defaultValues():
-    print "test@testdomain.com Test User"
+    print os.environ['GIT_AUTHOR_EMAIL'] + ' ' + os.environ['GIT_AUTHOR_NAME']
 
 # will only read a single line of input (if at all)
 line = sys.stdin.readline()
