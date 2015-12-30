@@ -6,6 +6,7 @@
 import sys
 import os
 import binascii
+import struct
 
 def readRevisions():
     revisionsFile = open(os.environ['SVN_REVISION_FILE'], 'ro')
@@ -66,7 +67,7 @@ def processRevisionsFile(fileName, revisionsMap):
         revisionId = binascii.hexlify(revisionId)
         # the revision has to be in the map
         if revisionId not in revisionsMap:
-            print "Revision " + str(revisionNumber) + " doesn't have a mapping revisions (" + revisionId + ")"
+            sys.stderr.write("Revision " + str(revisionNumber) + " doesn't have a mapped revision (" + revisionId + ")\n")
             missingRevisions = True
         else:
             newMapping[revisionNumber] = revisionsMap[revisionId]
@@ -75,7 +76,11 @@ def processRevisionsFile(fileName, revisionsMap):
     revisionsFile.close()
 
     if not missingRevisions:
-        print "Let's write the file"
+        for revisionNumber in sorted(newMapping.keys()):
+            sys.stdout.write(struct.pack('>I', revisionNumber))
+            sys.stdout.write(binascii.unhexlify(newMapping[revisionNumber]))
+    else:
+        sys.stderr.write("Won't rewrite file " + fileName + " because of missing revisions\n")
 
 revisionsMap=readRevisions()
 
