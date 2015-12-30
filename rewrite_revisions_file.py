@@ -76,9 +76,11 @@ def processRevisionsFile(fileName, revisionsMap):
     revisionsFile.close()
 
     if not missingRevisions:
+        revisionsFile = open(fileName, 'w')
         for revisionNumber in sorted(newMapping.keys()):
-            sys.stdout.write(struct.pack('>I', revisionNumber))
-            sys.stdout.write(binascii.unhexlify(newMapping[revisionNumber]))
+            revisionsFile.write(struct.pack('>I', revisionNumber))
+            revisionsFile.write(binascii.unhexlify(newMapping[revisionNumber]))
+        revisionsFile.close()
     else:
         sys.stderr.write("Won't rewrite file " + fileName + " because of missing revisions\n")
 
