@@ -25,9 +25,11 @@ I think only two things are needed:
 
 
 SET UP
-Two environment variables have to be EXPORTed:
+- Two environment variables have to be EXPORTed:
 SVN_AUTHORS - path to git-svn's authors file
 SVN_REVISION_FILE - path for the file where the mapping between old and new revision IDs will be held
+
+- Also, do this process on a _copy_ of your repo just in case.
 
 
 REWRITE PROCESS

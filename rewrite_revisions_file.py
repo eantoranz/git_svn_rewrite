@@ -51,14 +51,15 @@ def processRevisionsFile(fileName, revisionsMap):
                 break
             revisionNumber = revisionNumber * 256 + ord(aByte)
         # now let's capture the ID of the revision
-        revisionId = "" 
-        for i in range(0, 20):
-            aByte = revisionsFile.read(1)
-            if len(aByte) == 0:
-                # reached EOF
-                eof = True
-                break
-            revisionId += aByte
+        revisionId = ""
+        if not eof:
+            for i in range(0, 20):
+                aByte = revisionsFile.read(1)
+                if len(aByte) == 0:
+                    # reached EOF
+                    eof = True
+                    break
+                revisionId += aByte
 
         if eof:
             # finished with the file
