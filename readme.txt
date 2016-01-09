@@ -10,25 +10,27 @@ that could be used to map user IDs as used on svn with real people's names
 and mail addresses, the way it is used on git. But it was already too late
 for the revisions I already had on my repo.
 
-I tried to rebuild the history of the project (again) but failed for...
-doesn't matter, does it?
+I tried to rebuild the history of the project from scratch (again) but
+failed with some sort of sigseg so, after many attempts, I just gave up.
 
 So I decided to create something that could hack git-svn's metadata
-after having "rewriten" the history of the branches (with filter-branch).
-
+after having "rewritten" the history of the branches (with filter-branch)
+so that I got the real names of people of commits that had svn's user IDs.
 
 
 REQUIREMENTS
 I think only two things are needed:
 - Bash
-- Python
-
+- Python (I tested with 2.7 and 3.0)
 
 
 SET UP
-Two environment variables have to be set up:
+Two environment variables have to be EXPORTed:
 SVN_AUTHORS - path to git-svn's authors file
 SVN_REVISION_FILE - path for the file where the mapping between old and new revision IDs will be held
+
+
+REWRITE PROCESS
 
 The process to rewrite the history of the project consists of two steps:
 
@@ -38,11 +40,19 @@ The process to rewrite the history of the project consists of two steps:
 - rewrite git-svn's revision mapping files:
   Ex: find .git -iname '.rev_map*' -exec /path/to/git_svn_rewrite/rewrite_revisions_file.py {} ';'
 
-That should be enough to be able to rewrite the whole history of the project (but I will test it for
-real tomorrow so don't expect it to work just because I say so now... v0.1, see?).
+Both variables have to be set up for both parts of the process.
+
+
+BOTTOMLINE
+
+I was successful rewriting the history on a repository with plenty of branches and plenty
+of revisions. After the rewrite process was done (both steps) I was able to continue working as
+usual with fetch/dcommit (I particularly don't do other fancy stuff with git-svn, be warned).
+
 
 Cheers!
 
 Edmundo Carmona Antoranz
-Dec 2015 
+Jan 2016 
 Heredia, Costa Rica
+

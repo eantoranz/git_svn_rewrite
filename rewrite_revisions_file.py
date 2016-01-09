@@ -9,7 +9,7 @@ import binascii
 import struct
 
 def readRevisions():
-    revisionsFile = open(os.environ['SVN_REVISION_FILE'], 'ro')
+    revisionsFile = open(os.environ['SVN_REVISION_FILE'], 'rb')
     revisions = dict()
     while True:
         line = revisionsFile.readline()
@@ -37,7 +37,7 @@ def parseByte(aByte):
 
 def processRevisionsFile(fileName, revisionsMap):
     newMapping = dict() # mapping number of ID to new Revision
-    revisionsFile=open(fileName, 'ro')
+    revisionsFile=open(fileName, 'rb')
     eof = False
     missingRevisions = False # we assume all revisions are found
     while True:
@@ -76,7 +76,7 @@ def processRevisionsFile(fileName, revisionsMap):
     revisionsFile.close()
 
     if not missingRevisions:
-        revisionsFile = open(fileName, 'w')
+        revisionsFile = open(fileName, 'wb')
         for revisionNumber in sorted(newMapping.keys()):
             revisionsFile.write(struct.pack('>I', revisionNumber))
             revisionsFile.write(binascii.unhexlify(newMapping[revisionNumber]))
