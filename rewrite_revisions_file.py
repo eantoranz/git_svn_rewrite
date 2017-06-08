@@ -39,7 +39,6 @@ def processRevisionsFile(fileName, revisionsMap):
     newMapping = dict() # mapping number of ID to new Revision
     revisionsFile=open(fileName, 'rb')
     eof = False
-    missingRevisions = False # we assume all revisions are found
     while True:
         # every item in the file has the binary ID of the binary (4 bytes) then the 160 bytes of the sha1 of the revision
         revisionNumber = 0
@@ -69,21 +68,20 @@ def processRevisionsFile(fileName, revisionsMap):
         # the revision has to be in the map
         if revisionId not in revisionsMap:
             sys.stderr.write("Revision " + str(revisionNumber) + " doesn't have a mapped revision (" + revisionId + ")\n")
-            missingRevisions = True
         else:
             newMapping[revisionNumber] = revisionsMap[revisionId]
 
     # done with the file
     revisionsFile.close()
 
-    if not missingRevisions:
-        revisionsFile = open(fileName, 'wb')
-        for revisionNumber in sorted(newMapping.keys()):
-            revisionsFile.write(struct.pack('>I', revisionNumber))
-            revisionsFile.write(binascii.unhexlify(newMapping[revisionNumber]))
-        revisionsFile.close()
-    else:
-        sys.stderr.write("Won't rewrite file " + fileName + " because of missing revisions\n")
+    # save original file just in case
+    os.rename(fileName, fileName + '_backup')
+
+    revisionsFile = open(fileName, 'wb')
+    for revisionNumber in sorted(newMapping.keys()):
+        revisionsFile.write(struct.pack('>I', revisionNumber))
+        revisionsFile.write(binascii.unhexlify(newMapping[revisionNumber]))
+    revisionsFile.close()
 
 revisionsMap=readRevisions()
 
