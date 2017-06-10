@@ -91,7 +91,7 @@ There are 5 steps involved in getting this done
   
   export SVN_REVISIONS_FILE=REVISIONS.txt
   git branch -r contains $REV2 | while read branch; do
-    find .git/svn/remotes/$branch -iname '.rev_map*' -exec rewrite_revisions_file.py {} ';'
+    find .git/svn/refs/remotes/$branch -iname '.rev_map*' -exec rewrite_revisions_file.py {} ';'
   done;
   
   There will be some messages about missing revisions. That's fine. That's because you replaced some "real" svn revisions
