@@ -14,7 +14,7 @@ What is it useful for?
 
 RECIPE
 
-There are 5 steps involved in getting this done
+There are 4 steps involved in getting this done
 
 1 Get ready:
 	Clean up your working tree. DO NOT have anything laying around before moving forward.
@@ -80,25 +80,9 @@ There are 5 steps involved in getting this done
 	matching _new_ revision IDs. In the end, the branches _won't be moved_ automatically. This has to
  	be done with the folowing steps.
 
-4 So far, nothing has been destroyed from your repo and you could move on as if nothing had happened. The last 2 steps will
-  actually hack the (local) svn branches so DO NOT take this step lightly.
+4 So far, nothing has been destroyed from your repo and you could move on as if nothing had happened. The last step will
+  actually reposition the (local) svn branches so DO NOT take this step lightly.
   
-  The history of the svn branches has to be hacked on git-svn. For that we will use rewrite_revisions_file.py
-  
-  This script works a little bit differently from the others in the sense that the revisions file has to be set up on an environment variable.
-  
-  Following previous eamples it could be run like this:
-  
-  export SVN_REVISIONS_FILE=REVISIONS.txt
-  git branch -r contains $REV2 | while read branch; do
-    find .git/svn/refs/remotes/$branch -iname '.rev_map*' -exec rewrite_revisions_file.py {} ';'
-  done;
-  
-  There will be some messages about missing revisions. That's fine. That's because you replaced some "real" svn revisions
-  with a single "squashed" revision and so those revisions won't exist on the git-svn revision file for that brach anymore.
-
-5 Now it's time to set the remote branches to point to their new revisions.
-
   Use move_remote_branch.sh specifying the revisions file and the remote branches that will be moved.
     Parameters
       - REVISIONS_FILE
