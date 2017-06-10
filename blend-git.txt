@@ -1,0 +1,114 @@
+SVN HISTORY Hacking tool
+
+blend-git allows you to replce pieces of the history of
+svn branches on git repos.
+
+What is it useful for?
+
+- Need to replace a merge process that is not set up as such on svn
+  (series of changes on a branch that ended up having no relation with
+  the other branch). blend-git will allow you to replace these separate
+  revisions on the branch with a single revision that will also have the
+  other branch that was merged as a parent.
+
+
+RECIPE
+
+There are 5 steps involved in getting this done
+
+1 Get ready:
+	Clean up your working tree. DO NOT have anything laying around before moving forward.
+	
+	Want to create a backup of the repo just in case?
+	  tar zxvf git_backup.tgz .git .gitignore
+        Panic button: If you want to get it back later on
+          rm -fR .git
+          tar zxvf git_backup.tgz
+
+  Consider yourself warned.
+
+2 Create the replacing merge revision with replace_merge.sh
+	You need to identity 3 revisions:
+		- REV1: The last revision _before_ the merge process you want to "turn into a real merge" started taking place.
+		  This revision will be one of the parents of the replacing revision
+		- REV2: The _last_ revision of the merge process
+		  The tree object of this revision will be the tree object of the replacing revision
+		- REV3: The other branch/revision that was "merged".
+		  This revision/branch will be the other parent of the replacing revision
+        
+        Results of this process:
+	    Revisions in the range REV1..REV2 will be "squashed" into a new revision
+	    The tree object of REV2 will be be used as the tree of the new revision
+	    The new revision will have REV1 and REV3 as parents
+
+	In the following examples on this and all the steps following it you will see variables like $REV1, $REV2, etc
+	They refer to these values just mentioned. Feel free to set them up in environment variables and then use them
+	as provided in the examples or you could just write the revisions IDs when making the calls.
+
+	When calling replace_merge.sh there are 5 parameters
+		- REV1
+		- REV2
+		- REV3
+		- Name of the author (if it's made up of more than 1 word, use quotes)
+		- Email of the author
+	replace_merge.sh will notify of the resulting revision
+	If you want to edit the message of the revision (it will be the standard content of a squashed merge),
+	feel free to amend it.
+
+3 Replace all history on top of REV2
+	You have to put all the history of the svn branches built on top of REV2 on top of the
+	new revision you just created with blend-git.sh
+	You will need a temporary file to save the mapping between old revisions and new revisions. This file will
+	be created if it doesn't exist. It can be used in case the process was interrupted for whatever reason.
+	
+	Warning:
+	  _DO NOT_ create the file on your own or some assumptions about how the script should behave will break.
+	  Also, it will be used on later steps so _DO NOT_ delete it after blend-git is done.
+
+	Parameters for blend-git will be
+	- Temporary file
+	- REV1
+	- REV2
+	- Revision that came out of step 2
+	- All svn branches that have to be rewritten
+	(In case of doubt about what REV1 and REV2 are, take a look at step 2)
+
+	Given that svn branches are _remote_ branches, you could do something like this:
+	git branch -r --contains $REV2 | xargs ./blend-git.sh REVISIONS.TXT $REV1 $REV2 $REV_FROM_STEP2
+
+	This process will take some time. In the end you will end up with a report of the branches and their
+	matching _new_ revision IDs. In the end, the branches _won't be moved_ automatically. This has to
+ 	be done with the folowing steps.
+
+4 So far, nothing has been destroyed from your repo and you could move on as if nothing had happened. The last 2 steps will
+  actually hack the (local) svn branches so DO NOT take this step lightly.
+  
+  The history of the svn branches has to be hacked on git-svn. For that we will use rewrite_revisions_file.py
+  
+  This script works a little bit differently from the others in the sense that the revisions file has to be set up on an environment variable.
+  
+  Following previous eamples it could be run like this:
+  
+  export SVN_REVISIONS_FILE=REVISIONS.txt
+  git branch -r contains $REV2 | while read branch; do
+    find .git/svn/remotes/$branch -iname '.rev_map*' -exec rewrite_revisions_file.py {} ';'
+  done;
+  
+  There will be some messages about missing revisions. That's fine. That's because you replaced some "real" svn revisions
+  with a single "squashed" revision and so those revisions won't exist on the git-svn revision file for that brach anymore.
+
+5 Now it's time to set the remote branches to point to their new revisions.
+
+  Use move_remote_branch.sh specifying the revisions file and the remote branches that will be moved.
+    Parameters
+      - REVISIONS_FILE
+      - Branches to be moved
+  
+  Using previous examples as the base:
+  
+  git branch -r --contains $REV2 | xargs move_remote_branch.sh REVISIONS.TXT.
+  
+  The script will report the previous revisions for the branches and the new ones
+
+
+You are done. Now you should be able to continue using your repo against svn
